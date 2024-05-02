@@ -1,4 +1,6 @@
-﻿namespace Asm_3
+﻿using System.Text;
+
+namespace Asm_3
 {
     // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
     public class LoggingMiddleware
@@ -12,27 +14,34 @@
 
         public async Task Invoke(HttpContext httpContext)
         {
-            var req = httpContext.Request;
-            var filePath = "log_request.txt";
-
-            // Create file if file doesn't exist
-            if (!File.Exists(filePath))
+            try
             {
-                File.Create(filePath).Close();
+                var request = httpContext.Request;
+                var filePath = "log_request.txt";
+
+                // Create file if file doesn't exist
+                if (!File.Exists(filePath))
+                {
+                    File.Create(filePath).Close();
+                }
+
+                var bodyContent = await new StreamReader(request.Body).ReadToEndAsync();
+
+                using StreamWriter writer = File.AppendText(filePath);
+                var logBuilder = new StringBuilder();
+                logBuilder.AppendLine("{");
+                logBuilder.AppendLine($"Scheme: [{request.Scheme}]");
+                logBuilder.AppendLine($"Host: [{request.Host}]");
+                logBuilder.AppendLine($"Path: [{request.Path}]");
+                logBuilder.AppendLine($"Query String: [{request.QueryString}]");
+                logBuilder.AppendLine($"Body: [{bodyContent}]");
+                logBuilder.AppendLine("}");
+                writer.WriteLine($"{logBuilder}");
             }
-
-            var bodyContent = string.Empty;
-
-            // Check if request method is POST
-            if (req.Method == HttpMethods.Post)
+            catch
             {
-                bodyContent = await new StreamReader(req.Body).ReadToEndAsync();
+                Console.WriteLine($"There are something wrong in {nameof(LoggingMiddleware)}");
             }
-
-            using StreamWriter writer = File.AppendText(filePath);
-            writer.WriteLine(
-                $"{{\nScheme: [{req.Scheme}]\nHost: [{req.Host}]\nPath: [{req.Path}]\nQuery String: [{req.QueryString}]\nBody: [{bodyContent}]\n}}\n"
-            );
             await _next(httpContext);
         }
     }
