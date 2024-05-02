@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Serilog;
+using System.Text;
 
 namespace Asm_3
 {
@@ -17,17 +18,9 @@ namespace Asm_3
             try
             {
                 var request = httpContext.Request;
-                var filePath = "log_request.txt";
-
-                // Create file if file doesn't exist
-                if (!File.Exists(filePath))
-                {
-                    File.Create(filePath).Close();
-                }
-
                 var bodyContent = await new StreamReader(request.Body).ReadToEndAsync();
 
-                using StreamWriter writer = File.AppendText(filePath);
+                
                 var logBuilder = new StringBuilder();
                 logBuilder.AppendLine("{");
                 logBuilder.AppendLine($"Scheme: [{request.Scheme}]");
@@ -36,11 +29,12 @@ namespace Asm_3
                 logBuilder.AppendLine($"Query String: [{request.QueryString}]");
                 logBuilder.AppendLine($"Body: [{bodyContent}]");
                 logBuilder.AppendLine("}");
-                writer.WriteLine($"{logBuilder}");
+                
+                Log.Information( logBuilder.ToString() );
             }
             catch
             {
-                Console.WriteLine($"There are something wrong in {nameof(LoggingMiddleware)}");
+                Log.Error($"There are something wrong in {nameof(LoggingMiddleware)}");
             }
             await _next(httpContext);
         }

@@ -1,9 +1,16 @@
 using Asm_3;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.File("logs/log_request.txt")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
