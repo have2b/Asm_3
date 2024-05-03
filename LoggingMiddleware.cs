@@ -20,7 +20,7 @@ namespace Asm_3
                 var request = httpContext.Request;
                 var bodyContent = await new StreamReader(request.Body).ReadToEndAsync();
 
-                
+
                 var logBuilder = new StringBuilder();
                 logBuilder.AppendLine("{");
                 logBuilder.AppendLine($"Scheme: [{request.Scheme}]");
@@ -29,8 +29,8 @@ namespace Asm_3
                 logBuilder.AppendLine($"Query String: [{request.QueryString}]");
                 logBuilder.AppendLine($"Body: [{bodyContent}]");
                 logBuilder.AppendLine("}");
-                
-                Log.Information( logBuilder.ToString() );
+
+                Log.Information(logBuilder.ToString());
             }
             catch
             {
